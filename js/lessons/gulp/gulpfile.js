@@ -7,20 +7,25 @@ const concat = require("gulp-concat")
 const clean = require("gulp-clean-dir")
 const cssnano = require("gulp-cssnano")
 const autoprefixer = require("gulp-autoprefixer")
+const browserSync = require("browser-sync").create()
 
 gulp.task('clean', function () {
+
     return gulp.src('./build', {
             allowEmpty: true,
             read: false
         })
         .pipe(clean("./build"))
+
 })
 
 gulp.task("scripts", function () {
+
     gulp.src("./js/*.js")
         .pipe(concat('all.js'))
         .pipe(uglify())
         .pipe(gulp.dest("build"))
+
 })
 
 gulp.task("images", function () {
@@ -50,10 +55,37 @@ gulp.task("css", function () {
 
 })
 
+gulp.task("html", function () {
+    gulp.src("./index.html")
+        .pipe(gulp.dest("build/"))
+})
+
+gulp.task("browser-sync", function () {
+    return browserSync.init({
+        server: {
+            baseDir: "./build/"
+        },
+        port: 3000,
+        host: "localhost",
+        logPrefix: "frontend",
+        open: true,
+    })
+})
+
+gulp.task("watch", function () {
+    gulp.watch("./js/*.js", gulp.series("scripts"));
+    gulp.watch("./css/*.css", gulp.series("css"));
+    gulp.watch("./*.html", gulp.series("html"));
+    gulp.watch("./images/*.jpg", gulp.series("images"));
+    gulp.watch("./icons/*", gulp.series("svg"));
+})
+
 gulp.task(
+
     "default",
     gulp.series(
         "clean",
-        gulp.parallel("scripts", "images", "svg", "css")
+        gulp.parallel("scripts", "images", "svg", "css", "html", "browser-sync")
     )
+
 )
