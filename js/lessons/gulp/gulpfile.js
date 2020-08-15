@@ -4,18 +4,34 @@ const imagemin = require("gulp-imagemin")
 const svg2png = require("gulp-svg2png")
 const svgmin = require("gulp-svgmin")
 const concat = require("gulp-concat")
-const clean = require("gulp-clean-dir")
+const clean = require("gulp-clean")
+// const clean = require("gulp-clean-dir")
 const cssnano = require("gulp-cssnano")
 const autoprefixer = require("gulp-autoprefixer")
 const browserSync = require("browser-sync").create()
+const pug = require("gulp-pug")
 
-gulp.task('clean', function () {
 
-    return gulp.src('./build', {
+gulp.task("templates", function buildHTML() {
+    return  gulp.src("./templates/pages/*.pug")
+            .pipe(
+                pug({
+                    pretty: true
+                }).on("error", function (error) {
+                    console.log(error)
+                })
+            ).pipe(
+                gulp.dest("./build")
+            )
+})
+
+gulp.task("clean", function () {
+
+    return gulp.src("./build", {
             allowEmpty: true,
             read: false
         })
-        .pipe(clean("./build"))
+        .pipe(clean("./build/"))
 
 })
 
@@ -55,10 +71,7 @@ gulp.task("css", function () {
 
 })
 
-gulp.task("html", function () {
-    gulp.src("./index.html")
-        .pipe(gulp.dest("build/"))
-})
+
 
 gulp.task("browser-sync", function () {
     return browserSync.init({
@@ -73,11 +86,11 @@ gulp.task("browser-sync", function () {
 })
 
 gulp.task("watch", function () {
-    gulp.watch("./js/*.js", gulp.series("scripts"));
-    gulp.watch("./css/*.css", gulp.series("css"));
-    gulp.watch("./*.html", gulp.series("html"));
-    gulp.watch("./images/*.jpg", gulp.series("images"));
-    gulp.watch("./icons/*", gulp.series("svg"));
+    gulp.watch("./js/*.js", gulp.series("scripts"))
+    gulp.watch("./css/*.css", gulp.series("css"))
+    gulp.watch("./images/*.jpg", gulp.series("images"))
+    gulp.watch("./icons/*", gulp.series("svg"))
+    gulp.watch("./templates/**/*.pug", gulp.series("templates"))
 })
 
 gulp.task(
@@ -85,7 +98,7 @@ gulp.task(
     "default",
     gulp.series(
         "clean",
-        gulp.parallel("scripts", "images", "svg", "css", "html", "browser-sync")
+        gulp.parallel("scripts", "images", "svg", "css", "templates", "browser-sync")
     )
 
 )
